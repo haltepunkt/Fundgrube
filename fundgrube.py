@@ -91,8 +91,6 @@ class Fundgrube:
     if search is not None:
       url = url + f'&text={search.replace(" ", "+")}'
 
-    print(url)
-
     response = self.__session.get(url, headers={
       'Accept' : '*/*',
       'User-Agent': 'Fundgrube/1.0 (https://github.com/haltepunkt/Fundgrube)'
