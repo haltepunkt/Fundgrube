@@ -106,8 +106,8 @@ class Fundgrube:
     return {}, False
 
   def postings(self, limit=1, offset=0, outlet_ids=[], category_ids=[], brands=[], search=None):
-    if limit > 100:
-      limit = 100
+    if limit > 99:
+      limit = 99
 
     postings, more_postings_available = self.__postings(
       limit=limit,
