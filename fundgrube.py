@@ -69,10 +69,10 @@ def to_dataclass(class_name, arguments):
 
 # Fundgrube API
 class Fundgrube:
-  def __init__(self, retailer=Retailer.MEDIAMARKT):
+  def __init__(self, retailer=Retailer.MEDIAMARKT, cache_expire_after=10):
     self.retailer = retailer
 
-    self.__session = CachedSession('cache', expire_after=10)
+    self.__session = CachedSession('cache', expire_after=cache_expire_after)
     self.__base_url = f'https://www.{self.retailer.value.lower()}.de/de/data/fundgrube/api/'
 
   def __postings(self, limit=1, offset=0, outlet_ids=[], category_ids=[], brands=[], search=None):
