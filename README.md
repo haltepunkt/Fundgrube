@@ -12,4 +12,4 @@ fundgrube = Fundgrube(retailer=Retailer.MEDIAMARKT)
 postings, more_postings_available = fundgrube.postings()
 ```
 
-See [examples.py](https://github.com/haltepunkt/Fundgrube/blob/master/examples.py) for further usage examples.
+See [examples.py](https://github.com/haltepunkt/Fundgrube/blob/master/examples.py), or [example_discounts.py](https://github.com/haltepunkt/Fundgrube/blob/master/example_discounts.py) for further usage examples.
