@@ -1,6 +1,6 @@
 # Fundgrube
 
-Search remaining stock, floor models, customer returns, etc. of MediaMarkt and SATURN.
+Search remaining stock, floor models, customer returns, etc. of [MediaMarkt](https://www.mediamarkt.de/de/data/fundgrube) and [SATURN](https://www.saturn.de/de/data/fundgrube).
 
 ## Usage
 
