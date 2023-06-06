@@ -125,7 +125,7 @@ class Fundgrube:
       try:
         price = float(posting['price'])
       except:
-        price = 0
+        price = None
 
       try:
         price_old = float(posting['price_old'])
