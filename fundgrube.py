@@ -100,7 +100,8 @@ class Fundgrube:
 
     if response.status_code == 200:
       postings = response.json()
-      more_postings_available = postings.get('more_postings_available', False)
+
+      more_postings_available = postings.get('morePostingsAvailable', False)
 
       return postings, more_postings_available
 
