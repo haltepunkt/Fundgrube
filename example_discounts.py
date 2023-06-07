@@ -30,8 +30,11 @@ while more_postings_available_mediamarkt or more_postings_available_saturn:
 print(f'Postings fetched: {len(postings)}')
 
 for discount in [50, 60, 70, 80, 90]:
-  print(f'Discount of {discount}% or higher: {len([posting for posting in postings if posting.discount >= discount])}')
+  print(f'Discount of {discount}% or higher: {sum(posting.discount >= discount for posting in postings)}')
+
+for price in [10, 5]:
+  print(f'Price of {price}€ or lower: {sum(posting.price <= price for posting in postings)}')
 
 for posting in sorted(postings, key=lambda posting: posting.discount):
-  if posting.discount >= 50:
-    print(f'{posting.product_id} | {posting.discount}% | {posting.retailer:<10} | {posting.brand} {posting.name} ({posting.price_old}€ -> {posting.price}€)')
+  if posting.discount >= 50 or posting.price <= 5:
+    print(f'{posting.product_id} | {posting.discount:>2}% | {posting.retailer:<10} | {posting.brand} {posting.name} ({posting.price_old}€ -> {posting.price}€)')
