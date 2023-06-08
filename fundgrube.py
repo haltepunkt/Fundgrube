@@ -82,8 +82,7 @@ class Fundgrube:
       url = url + f'&outletIds={"%2C".join([str(outlet_id) for outlet_id in outlet_ids])}'
 
     if len(brands) > 0:
-      url = url + f'&brands={"%2C".join(brands)}'
-      url = url.replace(' ', '+')
+      url = url + f'&brands={"%2C".join(brands)}'.replace(' ', '+')
 
     if len(category_ids) > 0:
       url = url + f'&categorieIds={"%2C".join(category_ids)}'
@@ -101,15 +100,15 @@ class Fundgrube:
 
       more_postings_available = postings.get('morePostingsAvailable', False)
 
-      return postings, more_postings_available
+      return postings, more_postings_available, url
 
-    return {}, False
+    return {}, False, url
 
   def postings(self, limit=1, offset=0, outlet_ids=[], category_ids=[], brands=[], search=None):
     if limit > 99:
       limit = 99
 
-    postings, more_postings_available = self.__postings(
+    postings, more_postings_available, url = self.__postings(
       limit=limit,
       offset=offset,
       outlet_ids=outlet_ids,
@@ -142,24 +141,24 @@ class Fundgrube:
 
       product_postings.append(product_posting)
 
-    return product_postings, more_postings_available
+    return product_postings, more_postings_available, url
 
   def categories(self):
-    postings, _ = self.__postings()
+    postings, _, _ = self.__postings()
 
     categories = postings.get('categories', [])
 
     return [to_dataclass(Category, category) for category in categories]
 
   def brands(self):
-    postings, _ = self.__postings()
+    postings, _, _ = self.__postings()
 
     brands = postings.get('brands', [])
 
     return [to_dataclass(Brand, brand) for brand in brands]
 
   def outlets(self):
-    postings, _ = self.__postings()
+    postings, _, _ = self.__postings()
 
     outlets = postings.get('outlets', [])
 

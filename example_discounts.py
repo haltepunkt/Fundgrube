@@ -15,8 +15,8 @@ offset = 0
 api_call_count = 0
 
 while more_postings_available_mediamarkt or more_postings_available_saturn:
-  postings_mediamarkt, more_postings_available_mediamarkt = fundgrube_mediamarkt.postings(limit=limit, offset=offset, search=search)
-  postings_saturn, more_postings_available_saturn = fundgrube_saturn.postings(limit=limit, offset=offset, search=search)
+  postings_mediamarkt, more_postings_available_mediamarkt, _ = fundgrube_mediamarkt.postings(limit=limit, offset=offset, search=search)
+  postings_saturn, more_postings_available_saturn, _ = fundgrube_saturn.postings(limit=limit, offset=offset, search=search)
 
   postings.extend(postings_mediamarkt)
   postings.extend(postings_saturn)
