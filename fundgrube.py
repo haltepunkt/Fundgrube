@@ -14,6 +14,7 @@ class Posting:
     brand_id, brand,
     price, price_old, discount,
     shipping_cost, shipping_type,
+    outlet_id, outlet,
     thumbnail_size=200
   ):
     self.retailer = retailer.value
@@ -35,6 +36,9 @@ class Posting:
 
     self.shipping_cost = shipping_cost
     self.shipping_type = shipping_type
+
+    self.outlet_id = outlet_id
+    self.outlet = outlet
 
     self.thumbnail_url = f'{image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
     self.product_url = f'https://www.{retailer.value.lower()}.de/de/product/_-{product_id}.html'
@@ -137,6 +141,7 @@ class Fundgrube:
         brand_id=posting['brand']['id'], brand=posting['brand']['name'],
         price=price, price_old=price_old, discount=posting['discount_in_percent'],
         shipping_cost=posting['shipping_cost'], shipping_type=posting['shipping_type'],
+        outlet_id=posting['outlet']['id'], outlet=posting['outlet']['name']
       )
 
       product_postings.append(product_posting)
