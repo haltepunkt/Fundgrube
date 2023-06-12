@@ -14,8 +14,7 @@ class Posting:
     brand_id, brand,
     price, price_old, discount,
     shipping_cost, shipping_type,
-    outlet_id, outlet,
-    thumbnail_size=200
+    outlet_id, outlet
   ):
     self.retailer = retailer.value
 
@@ -40,8 +39,10 @@ class Posting:
     self.outlet_id = outlet_id
     self.outlet = outlet
 
-    self.thumbnail_url = f'{image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
     self.product_url = f'https://www.{retailer.value.lower()}.de/de/product/_-{product_id}.html'
+
+  def thumbnail_url(self, thumbnail_size=200):
+    return f'{self.image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
 
   def __repr__(self):
     return f'{self.__class__}: {self.__dict__}'
