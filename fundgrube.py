@@ -2,179 +2,224 @@ from dataclasses import dataclass, fields
 from enum import Enum
 from requests_cache import CachedSession
 
+
 class Retailer(Enum):
-  MEDIAMARKT = 'MediaMarkt'
-  SATURN = 'SATURN'
+    MEDIAMARKT = 'MediaMarkt'
+    SATURN = 'SATURN'
+
 
 class Posting:
-  def __init__(self,
-    retailer,
-    id, product_id, category_id,
-    name, text, image_urls,
-    brand_id, brand,
-    price, price_old, discount,
-    shipping_cost, shipping_type,
-    outlet_id, outlet
-  ):
-    self.retailer = retailer.value
+    def __init__(
+        self,
+        retailer,
+        id, product_id, category_id,
+        name, text, image_urls,
+        brand_id, brand,
+        price, price_old, discount,
+        shipping_cost, shipping_type,
+        outlet_id, outlet
+    ):
+        self.retailer = retailer.value
 
-    self.id = id
-    self.product_id = product_id
-    self.category_id = category_id
+        self.id = id
+        self.product_id = product_id
+        self.category_id = category_id
 
-    self.name = name
-    self.text = text
-    self.image_urls = image_urls
+        self.name = name
+        self.text = text
+        self.image_urls = image_urls
 
-    self.brand_id = brand_id
-    self.brand = brand
+        self.brand_id = brand_id
+        self.brand = brand
 
-    self.price = price
-    self.price_old = price_old
-    self.discount = discount
+        self.price = price
+        self.price_old = price_old
+        self.discount = discount
 
-    self.shipping_cost = shipping_cost
-    self.shipping_type = shipping_type
+        self.shipping_cost = shipping_cost
+        self.shipping_type = shipping_type
 
-    self.outlet_id = outlet_id
-    self.outlet = outlet
+        self.outlet_id = outlet_id
+        self.outlet = outlet
 
-    self.product_url = f'https://www.{retailer.value.lower()}.de/de/product/_-{product_id}.html'
+        self.product_url = f'https://www.{retailer.value.lower()}.de/' \
+            f'de/product/_-{product_id}.html'
 
-  def thumbnail_url(self, thumbnail_size=200):
-    return f'{self.image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
+    def thumbnail_url(self, thumbnail_size=200):
+        return f'{self.image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
 
-  def __repr__(self):
-    return f'{self.__class__}: {self.__dict__}'
+    def __repr__(self):
+        return f'{self.__class__}: {self.__dict__}'
+
 
 @dataclass
 class Object:
-  id: int
-  name: str
-  count: int
+    id: int
+    name: str
+    count: int
+
 
 @dataclass
 class Category(Object):
-  pass
+    pass
+
 
 @dataclass
 class Brand(Object):
-  pass
+    pass
+
 
 @dataclass
 class Outlet(Object):
-  pass
+    pass
+
 
 def to_dataclass(class_name, arguments):
-  field_set = {field.name for field in fields(class_name) if field.init}
+    field_set = {field.name for field in fields(class_name) if field.init}
 
-  filtered = {key: value for key, value in arguments.items() if key in field_set}
+    filtered = {
+        key: value for key,
+        value in arguments.items() if key in field_set
+    }
 
-  return class_name(**filtered)
+    return class_name(**filtered)
 
-# Fundgrube API
+
 class Fundgrube:
-  def __init__(self, retailer=Retailer.MEDIAMARKT, cache_expire_after=10):
-    self.retailer = retailer
+    def __init__(self, retailer=Retailer.MEDIAMARKT, cache_expire_after=10):
+        self.user_agent = '{} {}'.format(
+            'Fundgrube/1.0',
+            '(https://github.com/haltepunkt/Fundgrube)'
+        )
 
-    self.__session = CachedSession('cache', expire_after=cache_expire_after)
-    self.__base_url = f'https://www.{self.retailer.value.lower()}.de/de/data/fundgrube/api/'
+        self.retailer = retailer
 
-  def __postings(self, limit=1, offset=0, outlet_ids=[], category_ids=[], brands=[], search=None):
-    url = f'{self.__base_url}postings?limit={limit}&offset={offset}'
+        self.__session = CachedSession(
+            'cache',
+            expire_after=cache_expire_after
+        )
 
-    if len(outlet_ids) > 0:
-      url = url + f'&outletIds={"%2C".join([str(outlet_id) for outlet_id in outlet_ids])}'
+        self.__base_url = f'https://www.{self.retailer.value.lower()}.de/' \
+            'de/data/fundgrube/api/'
 
-    if len(brands) > 0:
-      url = url + f'&brands={"%2C".join(brands)}'.replace(' ', '+')
+    def __postings(self, limit=1, offset=0,
+                   outlet_ids=[], category_ids=[], brands=[],
+                   search=None):
+        url = f'{self.__base_url}postings?limit={limit}&offset={offset}'
 
-    if len(category_ids) > 0:
-      url = url + f'&categorieIds={"%2C".join(category_ids)}'
+        if len(outlet_ids) > 0:
+            outlet_ids_formatted = '%2C'.join(
+                [str(outlet_id) for outlet_id in outlet_ids]
+            )
 
-    if search is not None:
-      url = url + f'&text={search.replace(" ", "+")}'
+            url = url + f'&outletIds={outlet_ids_formatted}'
 
-    response = self.__session.get(url, headers={
-      'Accept' : '*/*',
-      'User-Agent': 'Fundgrube/1.0 (https://github.com/haltepunkt/Fundgrube)'
-    })
+        if len(brands) > 0:
+            url = url + f'&brands={"%2C".join(brands)}'.replace(' ', '+')
 
-    if response.status_code == 200:
-      postings = response.json()
+        if len(category_ids) > 0:
+            url = url + f'&categorieIds={"%2C".join(category_ids)}'
 
-      more_postings_available = postings.get('morePostingsAvailable', False)
+        if search is not None:
+            url = url + f'&text={search.replace(" ", "+")}'
 
-      return postings, more_postings_available, url
+        response = self.__session.get(
+            url,
+            headers={
+                'Accept': '*/*',
+                'User-Agent': self.user_agent
+            }
+        )
 
-    return {}, False, url
+        if response.status_code == 200:
+            postings = response.json()
 
-  def postings(self, limit=1, offset=0, outlet_ids=[], category_ids=[], brands=[], search=None):
-    if limit > 99:
-      limit = 99
+            more_postings_available = postings.get(
+                'morePostingsAvailable',
+                False
+            )
 
-    postings, more_postings_available, url = self.__postings(
-      limit=limit,
-      offset=offset,
-      outlet_ids=outlet_ids,
-      category_ids=category_ids,
-      brands=brands,
-      search=search
-    )
+            return postings, more_postings_available, url
 
-    product_postings = []
+        return {}, False, url
 
-    for posting in postings.get('postings', []):
-      try:
-        price = float(posting['price'])
-      except:
-        price = None
+    def postings(self, limit=1, offset=0,
+                 outlet_ids=[], category_ids=[], brands=[],
+                 search=None):
+        if limit > 99:
+            limit = 99
 
-      try:
-        price_old = float(posting['price_old'])
-      except:
-        price_old = None
+        postings, more_postings_available, url = self.__postings(
+            limit=limit,
+            offset=offset,
+            outlet_ids=outlet_ids,
+            category_ids=category_ids,
+            brands=brands,
+            search=search
+        )
 
-      product_posting = Posting(
-        retailer=self.retailer,
-        id=posting['posting_id'], product_id=posting['pim_id'], category_id=posting['top_level_catalog_id'],
-        name=posting['name'], text=posting['posting_text'], image_urls=posting['original_url'],
-        brand_id=posting['brand']['id'], brand=posting['brand']['name'],
-        price=price, price_old=price_old, discount=posting['discount_in_percent'],
-        shipping_cost=posting['shipping_cost'], shipping_type=posting['shipping_type'],
-        outlet_id=posting['outlet']['id'], outlet=posting['outlet']['name']
-      )
+        product_postings = []
 
-      product_postings.append(product_posting)
+        for posting in postings.get('postings', []):
+            try:
+                price = float(posting['price'])
+            except ValueError:
+                price = None
 
-    return product_postings, more_postings_available, url
+            try:
+                price_old = float(posting['price_old'])
+            except ValueError:
+                price_old = None
 
-  def categories(self):
-    postings, _, _ = self.__postings()
+            product_posting = Posting(
+                retailer=self.retailer,
+                id=posting['posting_id'],
+                product_id=posting['pim_id'],
+                category_id=posting['top_level_catalog_id'],
+                name=posting['name'],
+                text=posting['posting_text'],
+                image_urls=posting['original_url'],
+                brand_id=posting['brand']['id'],
+                brand=posting['brand']['name'],
+                price=price,
+                price_old=price_old,
+                discount=posting['discount_in_percent'],
+                shipping_cost=posting['shipping_cost'],
+                shipping_type=posting['shipping_type'],
+                outlet_id=posting['outlet']['id'],
+                outlet=posting['outlet']['name']
+            )
 
-    categories = postings.get('categories', [])
+            product_postings.append(product_posting)
 
-    return [to_dataclass(Category, category) for category in categories]
+        return product_postings, more_postings_available, url
 
-  def brands(self):
-    postings, _, _ = self.__postings()
+    def categories(self):
+        postings, _, _ = self.__postings()
 
-    brands = postings.get('brands', [])
+        categories = postings.get('categories', [])
 
-    return [to_dataclass(Brand, brand) for brand in brands]
+        return [to_dataclass(Category, category) for category in categories]
 
-  def outlets(self):
-    postings, _, _ = self.__postings()
+    def brands(self):
+        postings, _, _ = self.__postings()
 
-    outlets = postings.get('outlets', [])
+        brands = postings.get('brands', [])
 
-    return [to_dataclass(Outlet, outlet) for outlet in outlets]
+        return [to_dataclass(Brand, brand) for brand in brands]
 
-  def outlet(self, outlet_name):
-    outlets = self.outlets()
+    def outlets(self):
+        postings, _, _ = self.__postings()
 
-    for outlet in outlets:
-      if outlet.name == outlet_name:
-        return outlet
+        outlets = postings.get('outlets', [])
 
-    return None
+        return [to_dataclass(Outlet, outlet) for outlet in outlets]
+
+    def outlet(self, outlet_name):
+        outlets = self.outlets()
+
+        for outlet in outlets:
+            if outlet.name == outlet_name:
+                return outlet
+
+        return None

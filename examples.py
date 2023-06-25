@@ -1,4 +1,4 @@
-from fundgrube import *
+from fundgrube import Fundgrube, Retailer
 import pprint
 
 pp = pprint.PrettyPrinter()
@@ -15,7 +15,10 @@ pp.pprint(fundgrube.brands()[:4])
 pp.pprint(fundgrube.outlets()[:4])
 
 # Postings by category
-postings, _, _ = fundgrube.postings(limit=4, category_ids=['CAT_DE_MM_115', 'CAT_DE_MM_8000'])
+postings, _, _ = fundgrube.postings(
+    limit=4,
+    category_ids=['CAT_DE_MM_115', 'CAT_DE_MM_8000']
+)
 pp.pprint(postings)
 
 # Postings by brand
@@ -27,10 +30,10 @@ pp.pprint(postings)
 outlet = fundgrube.outlet(outlet_name='Bonn')
 
 if outlet is not None:
-  pp.pprint(outlet)
+    pp.pprint(outlet)
 
-  postings, _, _ = fundgrube.postings(limit=4, outlet_ids=[outlet])
-  pp.pprint(postings)
+    postings, _, _ = fundgrube.postings(limit=4, outlet_ids=[outlet])
+    pp.pprint(postings)
 
 # Text search
 postings, _, _ = fundgrube.postings(limit=4, search='iPhone SE')
