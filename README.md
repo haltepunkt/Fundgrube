@@ -5,7 +5,7 @@ Search remaining stock, floor models, customer returns, etc. of [MediaMarkt](htt
 ## Usage
 
 ```
-from fundgrube import *
+from fundgrube import Fundgrube, Retailer
 
 fundgrube = Fundgrube(retailer=Retailer.MEDIAMARKT)
 
