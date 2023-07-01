@@ -5,11 +5,13 @@ from typing import Tuple
 
 
 class Retailer(Enum):
+    """Available retailers to use when initializing a Fundgrube"""
     MEDIAMARKT = 'MediaMarkt'
     SATURN = 'SATURN'
 
 
 class Posting:
+    """A class that represents a Posting"""
     def __init__(self,
                  retailer: Retailer,
                  id: str,
@@ -49,14 +51,24 @@ class Posting:
             f'de/product/_-{product_id}.html'
 
     def thumbnail_url(self, thumbnail_size=200) -> str:
+        """
+        Returns a URL that points to a thumbnail
+
+        Parameters:
+
+        thumbnail_size : int, optional
+            Size (equal width and height) of the thumbnail
+        """
         return f'{self.image_urls[0]}?x={thumbnail_size}&y={thumbnail_size}'
 
     def __repr__(self):
+        """Returns a string representation of a Posting"""
         return f'{self.__class__}: {self.__dict__}'
 
 
 @dataclass
 class Object:
+    """A base dataclass that represents an Object"""
     id: int
     name: str
     count: int
@@ -64,20 +76,57 @@ class Object:
 
 @dataclass
 class Category(Object):
+    """
+    A dataclass that represents a Category
+
+    Attributes:
+    id : int
+        Identifier of the Category
+    name : str
+        Name of the Category
+    count : int
+        Amount of Postings that match the Category
+    """
     pass
 
 
 @dataclass
 class Brand(Object):
+    """
+    A dataclass that represents a Brand
+
+    Attributes:
+    id : int
+        Identifier of the Brand
+    name : str
+        Name of the Brand
+    count : int
+        Amount of Postings that belong to the Brand
+    """
     pass
 
 
 @dataclass
 class Outlet(Object):
+    """
+    A dataclass that represents an Outlet
+
+    Attributes:
+    id : int
+        Identifier of the Outlet
+    name : str
+        Name of the Outlet
+    count : int
+        Amount of Postings that are submitted by the Outlet
+    """
     pass
 
 
 def to_dataclass(class_name, arguments):
+    """
+    A helper function that returns a dataclass object of Category, Brand,
+    or Outlet from JSON-encoded content
+    """
     field_set = {field.name for field in fields(class_name) if field.init}
 
     filtered = {
@@ -89,10 +138,19 @@ def to_dataclass(class_name, arguments):
 
 
 class Fundgrube:
+    """A class that represents a Fundgrube"""
     def __init__(self,
                  retailer: Retailer = Retailer.MEDIAMARKT,
                  cache_expire_after: int = 10
                  ):
+        """
+        Parameters:
+
+        retailer : Retailer
+            Retailer to query
+        cache_expire_after : int, optional
+            Time after which cached items will expire
+        """
         self.user_agent = '{} {}'.format(
             'Fundgrube/1.0',
             '(https://github.com/haltepunkt/Fundgrube)'
@@ -160,6 +218,25 @@ class Fundgrube:
                  brands: list[str] = [],
                  search: str = None
                  ) -> Tuple[list[Posting], bool, str]:
+        """
+        Returns a list of Postings, whether more Postings are available,
+        and a URL of the query
+
+        Parameters:
+
+        limit: int
+            Amount of Postings to return. A value between 1 and 99
+        offset: int
+            Offset to use when querying multiple pages of Postings
+        outlet_ids: list[int]
+            Identifiers of Outlets to search for
+        category_ids: list[int]
+            Identifiers of Categories to search for
+        brand_ids: list[int]
+            Identifiers of Brands to search for
+        search: str
+            String to search for in the names of Postings
+        """
         if limit > 99:
             limit = 99
 
@@ -210,6 +287,7 @@ class Fundgrube:
         return product_postings, more_postings_available, url
 
     def categories(self) -> list[Category]:
+        """Returns a list of Categories"""
         postings, _, _ = self.__postings()
 
         categories = postings.get('categories', [])
@@ -217,6 +295,7 @@ class Fundgrube:
         return [to_dataclass(Category, category) for category in categories]
 
     def brands(self) -> list[Brand]:
+        """Returns a list of Brands"""
         postings, _, _ = self.__postings()
 
         brands = postings.get('brands', [])
@@ -224,13 +303,22 @@ class Fundgrube:
         return [to_dataclass(Brand, brand) for brand in brands]
 
     def outlets(self) -> list[Outlet]:
+        """Returns a list of Outlets"""
         postings, _, _ = self.__postings()
 
         outlets = postings.get('outlets', [])
 
         return [to_dataclass(Outlet, outlet) for outlet in outlets]
 
-    def outlet(self, outlet_name) -> Outlet:
+    def outlet(self, outlet_name: str) -> Outlet:
+        """
+        Searches for and returns an Outlet
+
+        Parameters:
+
+        outlet_name: str
+            Exact name of the Outlet to search for
+        """
         outlets = self.outlets()
 
         for outlet in outlets:
